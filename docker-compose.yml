@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_scd
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - api_network
+      - agent_network
+
+
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: pgadmin_scd
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@test.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+    ports:
+      - "8080:80"
+    networks:
+      - agent_network
+
+  api:
+    build: .
+    container_name: api_scd
+    depends_on:
+      - postgres
+    ports:
+      - "6000:5000"
+    networks:
+      - api_network
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    
+
+networks:
+  agent_network:
+  api_network:
+
+volumes:
+  postgres_data:
