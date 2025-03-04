@@ -1,41 +1,151 @@
-# Weather-Data-REST-API
+# Weather Data REST API
 
-De a se rula scriptul de testare cu un Postman descarcat local!
+This is a REST API for managing weather data, built with Flask and PostgreSQL, and containerized using Docker.
 
-Pentru rularea dockerului se va folosii comanda:
+## Features
+- Manage **countries** (add, update, delete, list).
+- Manage **cities** linked to countries.
+- Store and retrieve **temperature records** for cities.
+- Uses **PostgreSQL** for data persistence.
+- Includes **PgAdmin** for database management.
+- Fully containerized with **Docker & Docker Compose**.
 
-sudo docker compose up --build
-(de verificat daca porturile servicilor sunt ocupate)
+---
 
-In docker-compose am 2 networkuri(unul pentru utilitarul bazei de date si 
-celalalt pentru serverul de API) si 3 servicii: 
+## Getting Started
 
-1. PostgreSQL (baza de date):
-    - username si parola pentru conectare: admin, admin
-    - port: 5432
-    - datele sunt persistente prin volumul postgres_data
+### Prerequisites
+Make sure you have the following installed on your machine:
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
-2. PgAdmin (utilitarul bazei de date):
-    - username si parola pentru conectare : admin@test.com, admin
-    - port: 8080
-    - depinde de pornirea serviciului postgres
+### Installation
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/your-username/traianis-weather-data-rest-api.git
+   cd traianis-weather-data-rest-api
+   ```
 
-3. Serverul API:
-    - foloseste un Dockerfile pentru a pornii serverul de Flask
-    - depinde de pornirea serviciului postgres
-    - port: 6000
+2. Build and run the application using Docker:
+   ```bash
+   sudo docker compose up --build
+   ```
+   **Note:** Ensure that ports `5432`, `8080`, and `6000` are not in use.
 
+---
 
-Serverul pentru API:
+## API Endpoints
 
-Dockerfileul va crea o imagine care copiaza requirements si scriptul in directorul de rulare si ruleaza api.py
+### 1. Countries
+- **Add a country**
+  ```http
+  POST /api/countries
+  ```
+  **Request Body:**
+  ```json
+  {
+    "nume": "Romania",
+    "lat": 45.9432,
+    "lon": 24.9668
+  }
+  ```
+- **Get all countries**
+  ```http
+  GET /api/countries
+  ```
+- **Update a country**
+  ```http
+  PUT /api/countries/{id}
+  ```
+- **Delete a country**
+  ```http
+  DELETE /api/countries/{id}
+  ```
 
-api.py: Desi in docker compose containerul pentru serviciul apiului va astepta sa se porneasca cel al bazei de date.
-S ar putea ca serverul bazei de date sa nu si termine initializarea inca, asa ca am introdus 5 reincercari in script
-(cu sleeptime intre ele). Dupa conectare verifica daca exista baza de date si o creeaza (+ tabelele) in caz contrar.
-Apoi am pornit serverul Flask.
+### 2. Cities
+- **Add a city**
+  ```http
+  POST /api/cities
+  ```
+- **Get all cities**
+  ```http
+  GET /api/cities
+  ```
+- **Get cities by country**
+  ```http
+  GET /api/cities/country/{id}
+  ```
 
-Pentru a face conexiunea dintre baza de date si serverul Flask am folosit sqlalchemy.
-Am facut clase care reprezinta tabelele din baza de date, la care am impus regulile 
-prezentate in enunt si am facut o metoda care sa returneze un dictionar cu datele din baza de date,
-prelucrand numele coloanelor pentru a satisface schema requesturilor. Pentru api am respectat cerintele din enunt.
+### 3. Temperatures
+- **Add a temperature record**
+  ```http
+  POST /api/temperatures
+  ```
+- **Get all temperature records**
+  ```http
+  GET /api/temperatures
+  ```
+- **Filter temperature records by city**
+  ```http
+  GET /api/temperatures/cities/{id}
+  ```
+- **Filter temperature records by country**
+  ```http
+  GET /api/temperatures/countries/{id}
+  ```
+
+---
+
+## Database Setup
+The database is initialized automatically by the application. It includes the following tables:
+- **Countries (`Tari`)**: Stores country names and coordinates.
+- **Cities (`Orase`)**: Stores city names, linked to a country.
+- **Temperatures (`Temperaturi`)**: Stores temperature values for cities, along with timestamps.
+
+---
+
+## Running Without Docker
+If you prefer running the application manually:
+
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Set up a PostgreSQL database manually and update the connection details in `api.py`.
+3. Run the Flask server:
+   ```bash
+   python api.py
+   ```
+
+---
+
+## Admin Panel (PgAdmin)
+To manage the database via **PgAdmin**, open your browser and navigate to:
+```
+http://localhost:8080
+```
+Login Credentials:
+- **Email:** `admin@test.com`
+- **Password:** `admin`
+
+---
+
+## Environment Variables
+These values are set in `docker-compose.yml`:
+- `POSTGRES_USER=admin`
+- `POSTGRES_PASSWORD=admin`
+- `POSTGRES_DB=temperatures`
+
+---
+
+## Technologies Used
+- **Flask** (Python web framework)
+- **PostgreSQL** (Relational database)
+- **PgAdmin** (Database management tool)
+- **SQLAlchemy** (ORM for database interactions)
+- **Docker & Docker Compose** (Containerization)
+
+---
+
+## License
+This project is licensed under the MIT License.
